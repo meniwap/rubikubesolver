@@ -58,3 +58,6 @@ TODO:
 - Ran `npm run test:run` after mirror behavior update.
 - Adjusted mirror toggle to only flip the 2D previews (last capture grid + manual face grid) without altering capture data; 3D preview remains accurate.
 - Ran `npm run test:run` after preview-only mirror change.
+- Renamed Enter page path to /scan with redirect from /enter; nav label now "Scan" and page title in Hebrew.
+- Added persistent draft storage for scan state (colors, selection, calibration, mirror) in localStorage; added explicit reset button.
+- Updated Playwright paths to /scan. Ran `npm run test:run` and `npm run test:playwright:smoke`.

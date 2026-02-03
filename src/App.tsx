@@ -30,7 +30,8 @@ function Main() {
         <Route path="/" element={<Navigate to="/play" replace />} />
         <Route path="/play" element={<PlayPage />} />
         <Route path="/learn" element={<LearnPage />} />
-        <Route path="/enter" element={<EnterCubePage />} />
+        <Route path="/scan" element={<EnterCubePage />} />
+        <Route path="/enter" element={<Navigate to="/scan" replace />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/play" replace />} />
       </Routes>
@@ -44,7 +45,7 @@ function BottomNav() {
       <div className="mx-auto flex w-full max-w-6xl items-center justify-around px-4 py-3 text-sm">
         <NavItem to="/play" label="Play" />
         <NavItem to="/learn" label="Learn" />
-        <NavItem to="/enter" label="Enter" />
+        <NavItem to="/scan" label="Scan" />
         <NavItem to="/settings" label="Settings" />
       </div>
     </nav>

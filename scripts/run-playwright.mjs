@@ -319,7 +319,7 @@ const directScenarios = [
   },
   {
     name: "enter-cube-flow",
-    path: "/enter",
+    path: "/scan",
     run: async (page) => {
       await page.click("text=טען מצב פתור");
       await page.click("text=טען למשחק");
@@ -332,7 +332,7 @@ const directScenarios = [
   },
   {
     name: "enter-cube-invalid-centers",
-    path: "/enter",
+    path: "/scan",
     run: async (page) => {
       await page.click("text=U (למעלה)");
       await stepTime(page, 150);

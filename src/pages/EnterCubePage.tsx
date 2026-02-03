@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Face } from "../cube/types";
 import { FACE_TO_COLOR, STICKER_COLORS, type StickerColor, toURFDLBFacelets, validateFaceletColors } from "../cube/validation";
 import { useGameStore } from "../state/gameStore";
@@ -8,6 +8,7 @@ import type { CalibrationMap, RGB } from "../utils/colorMatch";
 
 const FACES: Face[] = ["U", "R", "F", "D", "L", "B"];
 const FACE_ORDER: Face[] = ["U", "R", "F", "D", "L", "B"];
+const STORAGE_KEY = "enterCubeDraftV1";
 
 export function EnterCubePage() {
   const loadFromFacelets = useGameStore((s) => s.loadFromFacelets);
@@ -59,19 +60,68 @@ export function EnterCubePage() {
     setCalibration((prev) => ({ ...prev, [selectedColor]: rgb }));
   };
 
+  const resetAll = () => {
+    setColors(makeSolvedColors());
+    setSelectedFace("U");
+    setSelectedColor("white");
+    setCalibration({});
+    setMirrorPreview(false);
+    setErrors([]);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // ignore storage errors
+    }
+  };
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as {
+        colors?: StickerColor[];
+        selectedFace?: Face;
+        selectedColor?: StickerColor;
+        calibration?: CalibrationMap;
+        mirrorPreview?: boolean;
+      };
+      if (Array.isArray(parsed.colors) && parsed.colors.length === 54) {
+        setColors(parsed.colors);
+      }
+      if (parsed.selectedFace && FACES.includes(parsed.selectedFace)) setSelectedFace(parsed.selectedFace);
+      if (parsed.selectedColor && STICKER_COLORS.includes(parsed.selectedColor)) setSelectedColor(parsed.selectedColor);
+      if (parsed.calibration && typeof parsed.calibration === "object") setCalibration(parsed.calibration);
+      if (typeof parsed.mirrorPreview === "boolean") setMirrorPreview(parsed.mirrorPreview);
+    } catch {
+      // ignore malformed draft
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      const payload = {
+        colors,
+        selectedFace,
+        selectedColor,
+        calibration,
+        mirrorPreview,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch {
+      // ignore storage errors
+    }
+  }, [colors, selectedFace, selectedColor, calibration, mirrorPreview]);
+
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-bold">Enter Cube</h1>
+        <h1 className="text-xl font-bold">סריקת קובייה</h1>
         <div className="flex items-center gap-2">
           <button
             className="rounded-lg bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/15"
-            onClick={() => {
-              setColors(solvedColors);
-              setErrors([]);
-            }}
+            onClick={resetAll}
           >
-            טען מצב פתור
+            איפוס
           </button>
         </div>
       </div>
