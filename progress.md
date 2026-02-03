@@ -56,3 +56,5 @@ TODO:
 - Ran `npm run test:run` after mirror change.
 - Changed mirror behavior: keep video natural, only flip capture sampling via “היפוך צילום” toggle to avoid mirrored controls.
 - Ran `npm run test:run` after mirror behavior update.
+- Adjusted mirror toggle to only flip the 2D previews (last capture grid + manual face grid) without altering capture data; 3D preview remains accurate.
+- Ran `npm run test:run` after preview-only mirror change.

@@ -19,6 +19,7 @@ export function EnterCubePage() {
   const [selectedColor, setSelectedColor] = useState<StickerColor>("white");
   const [errors, setErrors] = useState<string[]>([]);
   const [calibration, setCalibration] = useState<CalibrationMap>({});
+  const [mirrorPreview, setMirrorPreview] = useState(false);
 
   const faceOffset = faceIndexOffset(selectedFace);
   const centerColors = useMemo<Record<Face, StickerColor>>(
@@ -101,6 +102,8 @@ export function EnterCubePage() {
             calibration={calibration}
             sampleLabel={colorLabelHe(selectedColor)}
             onSampleColor={handleSampleColor}
+            previewMirror={mirrorPreview}
+            onTogglePreviewMirror={() => setMirrorPreview((v) => !v)}
           />
 
           <FaceletPreview colors={colors} />
@@ -134,11 +137,11 @@ export function EnterCubePage() {
 
             <div className="mt-4 grid w-fit grid-cols-3 gap-2">
               {Array.from({ length: 9 }, (_, i) => {
-                const idx = faceOffset + i;
+                const idx = faceOffset + mapPreviewIndex(i, mirrorPreview);
                 const c = colors[idx]!;
                 return (
                   <button
-                    key={idx}
+                    key={`${selectedFace}-${i}`}
                     className="h-14 w-14 rounded-md border border-white/10"
                     style={{ background: colorHex(c) }}
                     onClick={() => setColors((prev) => setAt(prev, idx, selectedColor))}
@@ -236,6 +239,14 @@ function nextFaceFor(face: Face): Face {
   const idx = FACE_ORDER.indexOf(face);
   if (idx === -1) return "U";
   return FACE_ORDER[(idx + 1) % FACE_ORDER.length]!;
+}
+
+function mapPreviewIndex(i: number, mirror: boolean): number {
+  if (!mirror) return i;
+  const row = Math.floor(i / 3);
+  const col = i % 3;
+  const mirroredCol = 2 - col;
+  return row * 3 + mirroredCol;
 }
 
 function faceIndexOffset(face: Face): number {

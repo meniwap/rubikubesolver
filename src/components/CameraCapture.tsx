@@ -14,12 +14,13 @@ export function CameraCapture(props: {
   calibration?: CalibrationMap;
   sampleLabel?: string;
   onSampleColor?: (rgb: RGB) => void;
+  previewMirror: boolean;
+  onTogglePreviewMirror: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [enabled, setEnabled] = useState(false);
   const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
-  const [mirrorCapture, setMirrorCapture] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastCapture, setLastCapture] = useState<StickerColor[] | null>(null);
   const [ready, setReady] = useState(false);
@@ -76,7 +77,7 @@ export function CameraCapture(props: {
       setError("המצלמה עדיין לא מוכנה לצילום.");
       return;
     }
-    const colors = sampleFaceColors(video, OVERLAY_SCALE, props.calibration, mirrorCapture);
+    const colors = sampleFaceColors(video, OVERLAY_SCALE, props.calibration);
     if (colors.length === 9) {
       setLastCapture(colors);
       props.onCapture(colors);
@@ -125,9 +126,9 @@ export function CameraCapture(props: {
           </button>
           <button
             className="rounded-lg bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/15"
-            onClick={() => setMirrorCapture((v) => !v)}
+            onClick={props.onTogglePreviewMirror}
           >
-            {mirrorCapture ? "היפוך צילום: כן" : "היפוך צילום: לא"}
+            {props.previewMirror ? "היפוך תצוגה: כן" : "היפוך תצוגה: לא"}
           </button>
         </div>
       </div>
@@ -151,7 +152,7 @@ export function CameraCapture(props: {
         </div>
       </div>
       <div className="mt-2 text-xs text-white/60">
-        טיפ: אם “תצוגת צילום אחרונה” נראית הפוכה יחסית למצלמה, הפעילו “היפוך צילום”. הווידאו נשאר טבעי כדי
+        טיפ: אם “תצוגת צילום אחרונה” נראית הפוכה יחסית למצלמה, הפעילו “היפוך תצוגה”. הווידאו נשאר טבעי כדי
         להקל על הצילום. שמרו על אותה אוריינטציה לכל הפאות (U/R/F/D/L/B לפי התצוגה) כדי למנוע טעויות.
       </div>
 
@@ -194,9 +195,17 @@ export function CameraCapture(props: {
         <div className="mt-3">
           <div className="text-xs text-white/70">תצוגת צילום אחרונה:</div>
           <div className="mt-2 grid w-fit grid-cols-3 gap-1">
-            {lastCapture.map((c, i) => (
-              <div key={i} className="h-6 w-6 rounded-sm border border-white/10" style={{ background: colorHex(c) }} />
-            ))}
+            {Array.from({ length: 9 }, (_, i) => {
+              const idx = mapPreviewIndex(i, props.previewMirror);
+              const c = lastCapture[idx]!;
+              return (
+                <div
+                  key={i}
+                  className="h-6 w-6 rounded-sm border border-white/10"
+                  style={{ background: colorHex(c) }}
+                />
+              );
+            })}
           </div>
         </div>
       )}
@@ -204,12 +213,7 @@ export function CameraCapture(props: {
   );
 }
 
-function sampleFaceColors(
-  video: HTMLVideoElement,
-  scale: number,
-  calibration?: CalibrationMap,
-  mirror?: boolean,
-): StickerColor[] {
+function sampleFaceColors(video: HTMLVideoElement, scale: number, calibration?: CalibrationMap): StickerColor[] {
   const width = video.videoWidth;
   const height = video.videoHeight;
   const canvas = document.createElement("canvas");
@@ -227,8 +231,7 @@ function sampleFaceColors(
 
   for (let row = 0; row < 3; row++) {
     for (let col = 0; col < 3; col++) {
-      const sampleCol = mirror ? 2 - col : col;
-      const cx = Math.round(startX + (sampleCol + 0.5) * cell);
+      const cx = Math.round(startX + (col + 0.5) * cell);
       const cy = Math.round(startY + (row + 0.5) * cell);
       const rgb = sampleAverage(ctx, cx, cy, Math.max(3, Math.round(cell * 0.1)));
       colors.push(matchStickerColor(rgb, calibration));
@@ -236,6 +239,14 @@ function sampleFaceColors(
   }
 
   return colors;
+}
+
+function mapPreviewIndex(i: number, mirror: boolean): number {
+  if (!mirror) return i;
+  const row = Math.floor(i / 3);
+  const col = i % 3;
+  const mirroredCol = 2 - col;
+  return row * 3 + mirroredCol;
 }
 
 function sampleCenterColor(video: HTMLVideoElement, scale: number): RGB | null {
