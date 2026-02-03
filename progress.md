@@ -46,3 +46,5 @@ TODO:
 - Ran `npm run build`, `npm run test:run`, `npm run test:playwright:smoke`, `npm run test:playwright` (fullscreen skipped).
 - GitHub repo created: https://github.com/meniwap/rubikubesolver
 - Vercel CLI installed and logged in; initial deploy attempted (build fixed locally).
+- Added FaceletPreview 3D cube in Enter page to visualize current entered colors live; uses OrbitControls to rotate.
+- Ran `npm run test:run` and `npm run test:playwright:smoke` after preview addition.

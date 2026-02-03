@@ -3,6 +3,7 @@ import type { Face } from "../cube/types";
 import { FACE_TO_COLOR, STICKER_COLORS, type StickerColor, toURFDLBFacelets, validateFaceletColors } from "../cube/validation";
 import { useGameStore } from "../state/gameStore";
 import { CameraCapture } from "../components/CameraCapture";
+import { FaceletPreview } from "../components/FaceletPreview";
 
 const FACES: Face[] = ["U", "R", "F", "D", "L", "B"];
 const FACE_ORDER: Face[] = ["U", "R", "F", "D", "L", "B"];
@@ -88,6 +89,8 @@ export function EnterCubePage() {
             onCapture={handleCapture}
             onNextFace={() => setSelectedFace(nextFace)}
           />
+
+          <FaceletPreview colors={colors} />
 
           <div className="rounded-xl bg-white/5 p-3 text-sm">
             <div className="font-bold">מרכזים נוכחיים</div>
