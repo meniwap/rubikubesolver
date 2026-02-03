@@ -5,7 +5,7 @@ import { formatMoves, invertAlg, parseAlg } from "../cube/notation";
 import { generateFallbackScramble } from "../cube/scramble";
 import { solveOptimal } from "../solvers/optimal/solveOptimal";
 import { computeBeginnerSolution, getNextBeginnerHint } from "../solvers/beginner/beginnerSolver";
-import { getCurrentStage, stageLabelHe } from "../solvers/beginner/stages";
+import { stageLabelHe } from "../solvers/beginner/stages";
 import { isSolvable } from "../cube/validation";
 import { formatMs } from "../utils/time";
 

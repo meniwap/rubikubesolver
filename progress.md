@@ -38,3 +38,11 @@ TODO:
 - Added vercel.json and updated .gitignore + README.
 - Updated Playwright enter-cube scenarios to check load status + invalid centers error.
 - Ran `npm run test:run`, `npm run test:playwright:smoke`, `npm run test:playwright` (fullscreen skipped).
+- Added CameraCapture component with live grid + capture/retake/next face, and color matching via HSL/brightness heuristic.
+- EnterCube now preserves orientation mapping by centers (no auto-rotation). Updated info text and center summary.
+- Added `vitest.config.ts` and moved Vite test config out of `vite.config.ts` so `npm run build` succeeds.
+- Updated .gitignore, README, and vercel.json for deployment.
+- Playwright enter-cube scenario now checks status success + invalid centers error.
+- Ran `npm run build`, `npm run test:run`, `npm run test:playwright:smoke`, `npm run test:playwright` (fullscreen skipped).
+- GitHub repo created: https://github.com/meniwap/rubikubesolver
+- Vercel CLI installed and logged in; initial deploy attempted (build fixed locally).

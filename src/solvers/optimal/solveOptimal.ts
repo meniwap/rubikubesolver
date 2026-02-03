@@ -82,7 +82,9 @@ function findShortSolution(faceletsURFDLB: string): Alg | null {
       }
     }
     frontier = next;
-    if (best && depth >= best.length) break;
+    if (best) {
+      if (depth >= best.length) break;
+    }
   }
 
   return best;
