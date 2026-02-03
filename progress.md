@@ -66,3 +66,13 @@ TODO:
 - Added faceColors to render_game_to_text payload for debugging.
 - Ran `npm run test:run` and `npm run test:playwright:smoke` after changes.
 - Fixed PlayPage reset handler to keep faceColors after scan-based load; build now passes.
+- Added ability to stop ongoing solve: `stopMoves` clears queue and stops after current move; UI button in Play.
+- Added step-by-step hint controls in Play (beginner/optimal), mirroring Learn.
+- Added `faceColors` to game state and rendering so Play/Learn respects scanned color scheme.
+- Added `btn-danger` styling.
+- Ran `npm run test:run` and captured Play screenshot of new controls.
+- Updated UI styling across Play/Learn/Scan/Settings and MovePad for clearer controls + glass cards.
+- Added Hebrew nav labels + icon nav; improved cube viewport chrome.
+- Updated Playwright selectors to Hebrew UI labels and added stop-solve scenario.
+- Switched app font to Space Grotesk; extended Tailwind theme.
+- Ran `npm run test:run`, `npm run test:playwright:smoke`, and `npm run test:playwright` (fullscreen skipped).

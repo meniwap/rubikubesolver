@@ -184,7 +184,7 @@ const clientScenarios = [
     name: "scramble",
     path: "/play",
     actionsFile: "wait_180.json",
-    clickSelector: "text=Scramble",
+    clickSelector: "text=ערבב",
     assert: (state) => {
       assertStateBasics(state);
       if (state.facelets === SOLVED_FACELETS) throw new Error("Scramble did not change facelets");
@@ -195,7 +195,7 @@ const clientScenarios = [
     name: "move-pad-right",
     path: "/play",
     actionsFile: "wait_60.json",
-    clickSelector: 'button[title="Right"]',
+    clickSelector: 'button[title*="Right"]',
     assert: (state) => {
       assertStateBasics(state);
       if (state.historyLength < 1) throw new Error("MovePad did not record move");
@@ -221,11 +221,11 @@ const directScenarios = [
     run: async (page) => {
       await page.keyboard.press("R");
       await waitForState(page, (s) => s.historyLength === 1 && !s.isAnimating);
-      await page.click("text=Undo");
+      await page.click("text=בטל");
       const afterUndo = await waitForState(page, (s) => s.historyLength === 0 && !s.isAnimating);
       assertStateBasics(afterUndo);
       if (afterUndo.facelets !== SOLVED_FACELETS) throw new Error("Undo did not restore solved state");
-      await page.click("text=Redo");
+      await page.click("text=חזור");
       const afterRedo = await waitForState(page, (s) => s.historyLength === 1 && !s.isAnimating);
       assertStateBasics(afterRedo);
       if (afterRedo.facelets === SOLVED_FACELETS) throw new Error("Redo did not reapply move");
@@ -235,7 +235,7 @@ const directScenarios = [
     name: "solve-optimal",
     path: "/play",
     run: async (page) => {
-      await page.click("text=Scramble");
+      await page.click("text=ערבב");
       await waitForState(page, (s) => !s.isAnimating && s.queueLength === 0 && !s.isSolved);
       await page.click("text=פתרו (אופטימלי)");
       const solved = await waitForState(page, (s) => !s.isAnimating && s.queueLength === 0 && s.isSolved, 60000);
@@ -246,7 +246,7 @@ const directScenarios = [
     name: "solve-beginner",
     path: "/play",
     run: async (page) => {
-      await page.click("text=Scramble");
+      await page.click("text=ערבב");
       await waitForState(page, (s) => !s.isAnimating && s.queueLength === 0 && !s.isSolved);
       await page.click("text=פתרו (מתחילים)");
       const solved = await waitForState(page, (s) => !s.isAnimating && s.queueLength === 0 && s.isSolved, 60000);
@@ -321,10 +321,10 @@ const directScenarios = [
     name: "enter-cube-flow",
     path: "/scan",
     run: async (page) => {
-      await page.click("text=טען מצב פתור");
+      await page.click("text=איפוס");
       await page.click("text=טען למשחק");
       await page.waitForSelector("text=הקובייה נטענה בהצלחה");
-      await page.click("text=Play");
+      await page.click("text=משחק");
       const state = await waitForState(page, (s) => s.mode === "play" && !s.isAnimating);
       assertStateBasics(state);
       if (!state.isSolved) throw new Error("Expected solved state after loading solved cube");
@@ -348,7 +348,7 @@ const directScenarios = [
     name: "learn-hint-apply",
     path: "/learn",
     run: async (page) => {
-      await page.click('button[title="Right"]');
+      await page.click('button[title*="Right"]');
       await waitForState(page, (s) => s.historyLength === 1 && !s.isAnimating);
       await clickByText(page, "רמז");
       const withHint = await waitForState(page, (s) => Boolean(s.hint && s.hint.nextMove));
@@ -356,6 +356,19 @@ const directScenarios = [
       await clickByText(page, "בצע מהלך");
       const afterMove = await waitForState(page, (s) => s.historyLength >= 2 && !s.isAnimating);
       assertStateBasics(afterMove);
+    },
+  },
+  {
+    name: "stop-solve",
+    path: "/play",
+    run: async (page) => {
+      await page.click("text=ערבב");
+      await waitForState(page, (s) => !s.isAnimating && s.queueLength === 0 && !s.isSolved);
+      await page.click("text=פתרו (מתחילים)");
+      await waitForState(page, (s) => s.isAnimating || s.queueLength > 0, 15000);
+      await clickByText(page, "עצור פתרון");
+      const stopped = await waitForState(page, (s) => s.queueLength === 0 && !s.isAnimating, 60000);
+      assertStateBasics(stopped);
     },
   },
   {

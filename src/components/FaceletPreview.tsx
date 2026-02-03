@@ -35,11 +35,21 @@ export function FaceletPreview(props: { colors: StickerColor[] }) {
   const facelets = useMemo(() => buildFacelets(props.colors), [props.colors]);
 
   return (
-    <div className="rounded-xl bg-white/5 p-3">
-      <div className="text-sm font-bold">תצוגת קובייה (תלת־ממד)</div>
-      <div className="mt-3 h-72 w-full overflow-hidden rounded-lg">
+    <div className="glass-card relative overflow-hidden p-4">
+      {/* Background glow */}
+      <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-purple-500/10 blur-3xl" />
+      
+      <div className="mb-3 flex items-center gap-2">
+        <div className="rounded-lg bg-gradient-to-br from-purple-500/20 to-blue-500/20 p-2">
+          <svg className="h-4 w-4 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+          </svg>
+        </div>
+        <span className="text-sm font-semibold">תצוגת קובייה</span>
+      </div>
+      <div className="h-64 w-full overflow-hidden rounded-xl border border-white/5 sm:h-72">
         <Canvas camera={{ position: [4.4, 3.4, 4.4], fov: 42 }} gl={{ antialias: true }}>
-          <color attach="background" args={["#0b1020"]} />
+          <color attach="background" args={["#0a0f1a"]} />
           <ambientLight intensity={0.7} />
           <directionalLight position={[6, 10, 8]} intensity={1.2} />
           <group>
@@ -57,7 +67,12 @@ export function FaceletPreview(props: { colors: StickerColor[] }) {
           <OrbitControls enablePan={false} minDistance={3.8} maxDistance={7.5} />
         </Canvas>
       </div>
-      <div className="mt-2 text-xs text-white/60">אפשר לסובב עם העכבר/אצבע כדי לבדוק שכל הפאות נכונות.</div>
+      <div className="mt-3 flex items-center gap-2 text-xs text-white/40">
+        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M5 12h14M12 5l7 7-7 7" />
+        </svg>
+        סובב עם העכבר/אצבע לבדיקת כל הפאות
+      </div>
     </div>
   );
 }

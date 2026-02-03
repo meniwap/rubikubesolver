@@ -39,6 +39,8 @@ export type HintState = {
   moves: Alg;
 };
 
+export type HintMode = "auto" | "beginner" | "optimal";
+
 export type MoveSource = "user" | "system";
 
 type QueuedMove = { move: Move; recordHistory: boolean; source: MoveSource };
@@ -81,9 +83,10 @@ type GameState = {
   redoMove: () => void;
   startSolve: () => void;
 
-  requestHint: () => Promise<void>;
+  requestHint: (mode?: HintMode) => Promise<void>;
   requestSolveOptimal: () => Promise<void>;
   requestSolveBeginner: () => Promise<void>;
+  stopMoves: () => void;
 
   loadFromFacelets: (
     faceletsURFDLB: string,
@@ -324,12 +327,13 @@ export const useGameStore = create<GameState>((set, get) => ({
     get().enqueueMoves(moves, { recordHistory: false, source: "system" });
   },
 
-  requestHint: async () => {
+  requestHint: async (mode = "auto") => {
     const s = get();
     if (s.isAnimating) return;
     set({ status: { kind: "loading", message: "מחשב רמז…" } });
     try {
-      if (s.mode === "learn") {
+      const useBeginner = mode === "beginner" || (mode === "auto" && s.mode === "learn");
+      if (useBeginner) {
         const hint = getNextBeginnerHint(s.cube);
         const stage = hint.stage;
         set({
@@ -385,6 +389,19 @@ export const useGameStore = create<GameState>((set, get) => ({
     } catch (e) {
       set({ status: { kind: "error", message: e instanceof Error ? e.message : String(e) } });
     }
+  },
+
+  stopMoves: () => {
+    const s = get();
+    if (s.queue.length === 0 && !s.isAnimating) return;
+    set({
+      queue: [],
+      hint: null,
+      status: {
+        kind: "info",
+        message: s.isAnimating ? "עוצר אחרי המהלך הנוכחי." : "הפתרון נעצר.",
+      },
+    });
   },
 
   loadFromFacelets: async (faceletsURFDLB, targetMode, faceColors) => {

@@ -113,27 +113,42 @@ export function EnterCubePage() {
   }, [colors, selectedFace, selectedColor, calibration, mirrorPreview]);
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-bold">סריקת קובייה</h1>
-        <div className="flex items-center gap-2">
-          <button
-            className="rounded-lg bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/15"
-            onClick={resetAll}
-          >
-            איפוס
-          </button>
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 p-4 sm:gap-6 sm:p-6">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <h1 className="page-title">סריקת קובייה</h1>
+        </div>
+        <button
+          className="btn-secondary flex items-center gap-2"
+          onClick={resetAll}
+        >
+          <ResetIcon />
+          איפוס
+        </button>
+      </div>
+
+      {/* Tip Card */}
+      <div className="glass-card flex items-start gap-3 p-4">
+        <div className="rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 p-2">
+          <TipIcon />
+        </div>
+        <div>
+          <h3 className="font-semibold">טיפ</h3>
+          <p className="mt-1 text-sm text-white/60">
+            הזן/י צבעים לפי המדבקות. האוריינטציה נשמרת בדיוק כפי שהוזנה (U/R/F/D/L/B לפי המסך).
+          </p>
         </div>
       </div>
 
-      <div className="rounded-xl bg-white/5 p-3 text-sm text-white/80">
-        טיפ: הזן/י צבעים לפי המדבקות. האוריינטציה נשמרת בדיוק כפי שהוזנה (U/R/F/D/L/B לפי המסך).
-      </div>
-
+      {/* Errors */}
       {errors.length > 0 && (
-        <div className="rounded-xl bg-red-500/15 p-3 text-sm">
-          <div className="font-bold">שגיאות</div>
-          <ul className="mt-2 list-disc pr-5">
+        <div className="status-error animate-fade-in">
+          <div className="flex items-center gap-2 font-bold">
+            <ErrorIcon />
+            שגיאות
+          </div>
+          <ul className="mt-2 list-disc pr-5 text-sm">
             {errors.map((e, i) => (
               <li key={i}>{e}</li>
             ))}
@@ -141,7 +156,8 @@ export function EnterCubePage() {
         </div>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
+        {/* Left Column - Camera & Preview */}
         <div className="flex flex-col gap-4">
           <CameraCapture
             activeFace={selectedFace}
@@ -158,25 +174,35 @@ export function EnterCubePage() {
 
           <FaceletPreview colors={colors} />
 
-          <div className="rounded-xl bg-white/5 p-3 text-sm">
-            <div className="font-bold">מרכזים נוכחיים</div>
-            <div className="mt-3 flex flex-wrap gap-3">
+          {/* Current Centers */}
+          <div className="glass-card p-4">
+            <div className="mb-3 text-xs font-medium uppercase tracking-wide text-white/50">
+              מרכזים נוכחיים
+            </div>
+            <div className="flex flex-wrap gap-3">
               {FACES.map((face) => (
-                <div key={face} className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded-sm border border-white/20" style={{ background: colorHex(centerColors[face]) }} />
-                  <span className="text-white/80">{face}</span>
+                <div key={face} className="flex items-center gap-2 rounded-lg bg-white/5 px-3 py-2">
+                  <div
+                    className="h-5 w-5 rounded-md border border-white/20 shadow-sm"
+                    style={{ background: colorHex(centerColors[face]) }}
+                  />
+                  <span className="text-sm font-medium text-white/80">{face}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="rounded-xl bg-white/5 p-3">
-            <div className="flex flex-wrap gap-2">
+          {/* Face Editor */}
+          <div className="glass-card p-4">
+            {/* Face Tabs */}
+            <div className="mb-4 flex flex-wrap gap-2">
               {FACES.map((f) => (
                 <button
                   key={f}
-                  className={`rounded-lg px-3 py-2 text-sm font-semibold ${
-                    selectedFace === f ? "bg-white/15" : "bg-white/10 hover:bg-white/15"
+                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
+                    selectedFace === f
+                      ? "bg-gradient-to-r from-purple-500/30 to-blue-500/30 text-white shadow-lg"
+                      : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
                   }`}
                   onClick={() => setSelectedFace(f)}
                 >
@@ -185,33 +211,47 @@ export function EnterCubePage() {
               ))}
             </div>
 
-            <div className="mt-4 grid w-fit grid-cols-3 gap-2">
-              {Array.from({ length: 9 }, (_, i) => {
-                const idx = faceOffset + mapPreviewIndex(i, mirrorPreview);
-                const c = colors[idx]!;
-                return (
-                  <button
-                    key={`${selectedFace}-${i}`}
-                    className="h-14 w-14 rounded-md border border-white/10"
-                    style={{ background: colorHex(c) }}
-                    onClick={() => setColors((prev) => setAt(prev, idx, selectedColor))}
-                    title={`${faceLabelHe(selectedFace)} ${i + 1}`}
-                  />
-                );
-              })}
+            {/* Face Grid */}
+            <div className="flex justify-center">
+              <div className="grid w-fit grid-cols-3 gap-2">
+                {Array.from({ length: 9 }, (_, i) => {
+                  const idx = faceOffset + mapPreviewIndex(i, mirrorPreview);
+                  const c = colors[idx]!;
+                  const isCenter = i === 4;
+                  return (
+                    <button
+                      key={`${selectedFace}-${i}`}
+                      className={`h-14 w-14 rounded-xl border-2 transition-all hover:scale-105 active:scale-95 sm:h-16 sm:w-16 ${
+                        isCenter
+                          ? "border-white/30 ring-2 ring-white/20"
+                          : "border-white/10 hover:border-white/20"
+                      }`}
+                      style={{ background: colorHex(c) }}
+                      onClick={() => setColors((prev) => setAt(prev, idx, selectedColor))}
+                      title={`${faceLabelHe(selectedFace)} ${i + 1}`}
+                    />
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col gap-3">
-          <div className="rounded-xl bg-white/5 p-3">
-            <div className="text-sm font-bold">פלטת צבעים</div>
-            <div className="mt-3 flex flex-wrap gap-2">
+        {/* Right Column - Color Palette & Actions */}
+        <div className="flex flex-col gap-4">
+          {/* Color Palette */}
+          <div className="glass-card p-4">
+            <div className="mb-3 text-xs font-medium uppercase tracking-wide text-white/50">
+              פלטת צבעים
+            </div>
+            <div className="flex flex-wrap gap-3">
               {STICKER_COLORS.map((c) => (
                 <button
                   key={c}
-                  className={`h-10 w-10 rounded-md border ${
-                    selectedColor === c ? "border-white" : "border-white/10"
+                  className={`h-12 w-12 rounded-xl border-2 transition-all hover:scale-110 active:scale-95 ${
+                    selectedColor === c
+                      ? "border-white shadow-lg ring-2 ring-white/30"
+                      : "border-white/10 hover:border-white/30"
                   }`}
                   style={{ background: colorHex(c) }}
                   onClick={() => setSelectedColor(c)}
@@ -219,46 +259,73 @@ export function EnterCubePage() {
                 />
               ))}
             </div>
-            <div className="mt-3 rounded-lg bg-white/10 px-3 py-2 text-xs text-white/70">
-              כיול מצלמה (מומלץ): {calibrationCount}/6 צבעים דגומים. בחר/י צבע ואז לחצ/י “דגום צבע” ליד המצלמה.
+
+            {/* Calibration Section */}
+            <div className="mt-4 rounded-xl bg-white/5 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-sm font-medium">כיול מצלמה</div>
+                  <div className="text-xs text-white/50">
+                    {calibrationCount}/6 צבעים דגומים
+                  </div>
+                </div>
+                <button
+                  className="btn-ghost text-xs"
+                  onClick={() => setCalibration({})}
+                >
+                  נקה כיול
+                </button>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {STICKER_COLORS.map((c) => (
+                  <div
+                    key={`${c}-calib`}
+                    className={`h-7 w-7 rounded-lg border-2 transition-all ${
+                      calibration[c] ? "border-emerald-400 shadow-emerald-400/20 shadow-lg" : "border-white/10"
+                    }`}
+                    style={{ background: colorHex(c) }}
+                    title={calibration[c] ? `דגום: ${colorLabelHe(c)}` : `לא דגום: ${colorLabelHe(c)}`}
+                  />
+                ))}
+              </div>
+              <p className="mt-3 text-xs text-white/40">
+                בחר/י צבע ואז לחצ/י "דגום צבע" ליד המצלמה.
+              </p>
             </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {STICKER_COLORS.map((c) => (
-                <div
-                  key={`${c}-calib`}
-                  className={`h-6 w-6 rounded-sm border ${calibration[c] ? "border-white" : "border-white/10"}`}
-                  style={{ background: colorHex(c) }}
-                  title={calibration[c] ? `דגום: ${colorLabelHe(c)}` : `לא דגום: ${colorLabelHe(c)}`}
-                />
-              ))}
-            </div>
-            <button
-              className="mt-3 rounded-lg bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15"
-              onClick={() => setCalibration({})}
-            >
-              נקה כיול
-            </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              className="rounded-lg bg-emerald-500/20 px-3 py-2 text-sm font-semibold hover:bg-emerald-500/30"
-              onClick={() => void onLoad("play")}
-            >
-              טען למשחק
-            </button>
-            <button
-              className="rounded-lg bg-sky-500/20 px-3 py-2 text-sm font-semibold hover:bg-sky-500/30"
-              onClick={() => void onLoad("learn")}
-            >
-              טען ללימוד
-            </button>
+          {/* Load Actions */}
+          <div className="glass-card p-4">
+            <div className="mb-3 text-xs font-medium uppercase tracking-wide text-white/50">
+              טען קובייה
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                className="btn-success flex items-center justify-center gap-2 py-3"
+                onClick={() => void onLoad("play")}
+              >
+                <GameIcon />
+                טען למשחק
+              </button>
+              <button
+                className="btn-info flex items-center justify-center gap-2 py-3"
+                onClick={() => void onLoad("learn")}
+              >
+                <LearnIcon />
+                טען ללימוד
+              </button>
+            </div>
           </div>
 
+          {/* Status Message */}
           {status.kind !== "idle" && (
             <div
-              className={`rounded-xl px-3 py-2 text-sm ${
-                status.kind === "error" ? "bg-red-500/20" : status.kind === "loading" ? "bg-white/10" : "bg-white/5"
+              className={`animate-fade-in ${
+                status.kind === "error"
+                  ? "status-error"
+                  : status.kind === "loading"
+                  ? "status-loading"
+                  : "status-info"
               }`}
             >
               {"message" in status ? status.message : ""}
@@ -373,4 +440,51 @@ function colorHex(c: StickerColor): string {
     case "orange":
       return "#ff9f3b";
   }
+}
+
+// Icons
+function ResetIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+      <path d="M3 3v5h5" />
+    </svg>
+  );
+}
+
+function TipIcon() {
+  return (
+    <svg className="h-5 w-5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M9 18h6" />
+      <path d="M10 22h4" />
+      <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14" />
+    </svg>
+  );
+}
+
+function ErrorIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+  );
+}
+
+function GameIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <polygon points="5 3 19 12 5 21 5 3" />
+    </svg>
+  );
+}
+
+function LearnIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    </svg>
+  );
 }
