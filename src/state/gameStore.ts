@@ -1,12 +1,12 @@
 import Cube from "cubejs";
 import { create } from "zustand";
-import type { Alg, Move } from "../cube/types";
+import type { Alg, Face, Move } from "../cube/types";
 import { formatMoves, invertAlg, parseAlg } from "../cube/notation";
 import { generateFallbackScramble } from "../cube/scramble";
 import { solveOptimal } from "../solvers/optimal/solveOptimal";
 import { computeBeginnerSolution, getNextBeginnerHint } from "../solvers/beginner/beginnerSolver";
 import { stageLabelHe } from "../solvers/beginner/stages";
-import { isSolvable } from "../cube/validation";
+import { FACE_TO_COLOR, isSolvable, type StickerColor } from "../cube/validation";
 import { formatMs } from "../utils/time";
 
 export type GameMode = "play" | "learn";
@@ -47,6 +47,7 @@ type GameState = {
   mode: GameMode;
   cube: Cube;
   facelets: string;
+  faceColors: Record<Face, StickerColor>;
   visualResetKey: number;
 
   history: Move[];
@@ -68,7 +69,7 @@ type GameState = {
   setAnimationMs: (ms: number) => void;
   setStatus: (status: Status) => void;
 
-  reset: () => void;
+  reset: (opts?: { faceColors?: Record<Face, StickerColor>; keepFaceColors?: boolean }) => void;
   enqueueMoves: (moves: Alg, opts?: { recordHistory?: boolean; source?: MoveSource }) => void;
   enqueueAlg: (algText: string, opts?: { recordHistory?: boolean; source?: MoveSource }) => void;
 
@@ -84,7 +85,11 @@ type GameState = {
   requestSolveOptimal: () => Promise<void>;
   requestSolveBeginner: () => Promise<void>;
 
-  loadFromFacelets: (faceletsURFDLB: string, targetMode: GameMode) => Promise<void>;
+  loadFromFacelets: (
+    faceletsURFDLB: string,
+    targetMode: GameMode,
+    faceColors?: Record<Face, StickerColor>,
+  ) => Promise<void>;
 
   timerToggle: () => void;
   timerReset: () => void;
@@ -107,6 +112,10 @@ function ensureSolverReady() {
 }
 
 ensureSolverReady();
+
+function defaultFaceColors(): Record<Face, StickerColor> {
+  return { ...FACE_TO_COLOR };
+}
 
 function loadStats(): PlayStats {
   if (typeof window === "undefined") return { ...DEFAULT_STATS };
@@ -161,6 +170,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   mode: "play",
   cube: new Cube(),
   facelets: SOLVED_FACELETS,
+  faceColors: defaultFaceColors(),
   visualResetKey: 0,
 
   history: [],
@@ -182,10 +192,11 @@ export const useGameStore = create<GameState>((set, get) => ({
   setAnimationMs: (ms) => set({ settings: { ...get().settings, animationMs: clamp(ms, 60, 900) } }),
   setStatus: (status) => set({ status }),
 
-  reset: () =>
-    set({
+  reset: (opts) =>
+    set((state) => ({
       cube: new Cube(),
       facelets: SOLVED_FACELETS,
+      faceColors: opts?.faceColors ?? (opts?.keepFaceColors ? state.faceColors : defaultFaceColors()),
       history: [],
       redo: [],
       queue: [],
@@ -197,7 +208,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       isSolved: true,
       pendingTimerStart: false,
       visualResetKey: get().visualResetKey + 1,
-    }),
+    })),
 
   enqueueMoves: (moves, opts) => {
     const recordHistory = opts?.recordHistory ?? true;
@@ -276,7 +287,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const s = get();
     if (s.isAnimating) return;
     const moves = createScrambleMoves();
-    s.reset();
+    s.reset({ keepFaceColors: true });
     get().enqueueMoves(moves, { recordHistory: false, source: "system" });
     set({ isSolved: false, pendingTimerStart: false });
     set({ status: { kind: "info", message: "בוצע ערבוב (Scramble)." } });
@@ -304,7 +315,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const s = get();
     if (s.isAnimating) return;
     const moves = createScrambleMoves();
-    s.reset();
+    s.reset({ keepFaceColors: true });
     set({
       pendingTimerStart: true,
       isSolved: false,
@@ -376,7 +387,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  loadFromFacelets: async (faceletsURFDLB, targetMode) => {
+  loadFromFacelets: async (faceletsURFDLB, targetMode, faceColors) => {
     const solvable = isSolvable(faceletsURFDLB);
     if (!solvable.ok) {
       set({ status: { kind: "error", message: solvable.reason } });
@@ -389,7 +400,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       const toSolved = await solveOptimal(faceletsURFDLB);
       const fromSolved = invertAlg(toSolved);
 
-      get().reset();
+      get().reset({ faceColors: faceColors ?? defaultFaceColors() });
       set({ mode: targetMode, isSolved: targetSolved, pendingTimerStart: false });
       get().enqueueMoves(fromSolved, { recordHistory: false, source: "system" });
       set({ status: { kind: "info", message: "הקובייה נטענה בהצלחה." } });

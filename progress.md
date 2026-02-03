@@ -61,3 +61,7 @@ TODO:
 - Renamed Enter page path to /scan with redirect from /enter; nav label now "Scan" and page title in Hebrew.
 - Added persistent draft storage for scan state (colors, selection, calibration, mirror) in localStorage; added explicit reset button.
 - Updated Playwright paths to /scan. Ran `npm run test:run` and `npm run test:playwright:smoke`.
+- Synced scan center colors to play/learn rendering by storing faceColors in game state and using them in CubeScene materials.
+- loadFromFacelets now accepts faceColors to preserve scanned color scheme across modes; scramble/startSolve keep existing colors.
+- Added faceColors to render_game_to_text payload for debugging.
+- Ran `npm run test:run` and `npm run test:playwright:smoke` after changes.

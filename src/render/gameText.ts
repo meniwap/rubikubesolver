@@ -39,7 +39,8 @@ export function registerGameText() {
       status: s.status,
       hint: s.hint ? { title: s.hint.title, nextMove: nextHintMove } : null,
       stats: s.stats,
-      note: "Facelets are cubejs URFDLB; colors: U=white, R=red, F=green, D=yellow, L=orange, B=blue.",
+      faceColors: s.faceColors,
+      note: "Facelets are cubejs URFDLB; faceColors may override default scheme.",
       ...(debug ? { visualFacelets, visualMismatch } : {}),
     };
 

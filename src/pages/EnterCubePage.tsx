@@ -48,7 +48,7 @@ export function EnterCubePage() {
     }
     setErrors([]);
     const facelets = toURFDLBFacelets(colors);
-    await loadFromFacelets(facelets, mode);
+    await loadFromFacelets(facelets, mode, centerColors);
   };
 
   const handleCapture = (faceColors: StickerColor[]) => {

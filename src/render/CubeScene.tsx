@@ -3,7 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Face, Move } from "../cube/types";
-import { FACE_TO_COLOR } from "../cube/validation";
+import type { StickerColor } from "../cube/validation";
 import { useGameStore } from "../state/gameStore";
 import { faceFromWorldNormal, moveFromDrag } from "./dragControls";
 import { axisDirForFace, layerSelector, quantizeVec3, radiansForMove } from "./moveAnimation";
@@ -29,6 +29,7 @@ export function CubeScene() {
   const status = useGameStore((s) => s.status);
   const setStatus = useGameStore((s) => s.setStatus);
   const facelets = useGameStore((s) => s.facelets);
+  const faceColors = useGameStore((s) => s.faceColors);
 
   const { camera } = useThree();
   const debug = import.meta.env.DEV || import.meta.env.MODE === "test";
@@ -165,6 +166,7 @@ export function CubeScene() {
             key={c.id}
             id={c.id}
             position={c.pos}
+            faceColors={faceColors}
             meshRef={(m) => {
               if (m) cubeletRefs.current[c.id] = m;
             }}
@@ -195,13 +197,14 @@ export function CubeScene() {
 function Cubelet(props: {
   id: string;
   position: [number, number, number];
+  faceColors: Record<Face, StickerColor>;
   meshRef: (m: THREE.Mesh | null) => void;
   onPointerDown: (e: any) => void;
   onPointerUp: (e: any) => void;
 }) {
   const { position } = props;
   const [x, y, z] = position;
-  const materials = useMemo(() => makeCubeletMaterials(x, y, z), [x, y, z]);
+  const materials = useMemo(() => makeCubeletMaterials(x, y, z, props.faceColors), [x, y, z, props.faceColors]);
   const stickerFaces = useMemo(() => cubeletStickerFaces(x, y, z), [x, y, z]);
 
   return (
@@ -222,14 +225,14 @@ function Cubelet(props: {
   );
 }
 
-function makeCubeletMaterials(x: number, y: number, z: number): string[] {
+function makeCubeletMaterials(x: number, y: number, z: number, faceColors: Record<Face, StickerColor>): string[] {
   // BoxGeometry material order: [right, left, top, bottom, front, back]
-  const right = x === 1 ? colorHex(FACE_TO_COLOR.R) : BODY_COLOR;
-  const left = x === -1 ? colorHex(FACE_TO_COLOR.L) : BODY_COLOR;
-  const top = y === 1 ? colorHex(FACE_TO_COLOR.U) : BODY_COLOR;
-  const bottom = y === -1 ? colorHex(FACE_TO_COLOR.D) : BODY_COLOR;
-  const front = z === 1 ? colorHex(FACE_TO_COLOR.F) : BODY_COLOR;
-  const back = z === -1 ? colorHex(FACE_TO_COLOR.B) : BODY_COLOR;
+  const right = x === 1 ? colorHex(faceColors.R) : BODY_COLOR;
+  const left = x === -1 ? colorHex(faceColors.L) : BODY_COLOR;
+  const top = y === 1 ? colorHex(faceColors.U) : BODY_COLOR;
+  const bottom = y === -1 ? colorHex(faceColors.D) : BODY_COLOR;
+  const front = z === 1 ? colorHex(faceColors.F) : BODY_COLOR;
+  const back = z === -1 ? colorHex(faceColors.B) : BODY_COLOR;
   return [right, left, top, bottom, front, back];
 }
 
