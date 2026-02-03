@@ -19,7 +19,7 @@ export function CameraCapture(props: {
   const streamRef = useRef<MediaStream | null>(null);
   const [enabled, setEnabled] = useState(false);
   const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
-  const [mirror, setMirror] = useState(false);
+  const [mirrorCapture, setMirrorCapture] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastCapture, setLastCapture] = useState<StickerColor[] | null>(null);
   const [ready, setReady] = useState(false);
@@ -76,7 +76,7 @@ export function CameraCapture(props: {
       setError("המצלמה עדיין לא מוכנה לצילום.");
       return;
     }
-    const colors = sampleFaceColors(video, OVERLAY_SCALE, props.calibration, mirror);
+    const colors = sampleFaceColors(video, OVERLAY_SCALE, props.calibration, mirrorCapture);
     if (colors.length === 9) {
       setLastCapture(colors);
       props.onCapture(colors);
@@ -125,9 +125,9 @@ export function CameraCapture(props: {
           </button>
           <button
             className="rounded-lg bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/15"
-            onClick={() => setMirror((v) => !v)}
+            onClick={() => setMirrorCapture((v) => !v)}
           >
-            {mirror ? "תצוגת מראה: כן" : "תצוגת מראה: לא"}
+            {mirrorCapture ? "היפוך צילום: כן" : "היפוך צילום: לא"}
           </button>
         </div>
       </div>
@@ -136,7 +136,6 @@ export function CameraCapture(props: {
         <video
           ref={videoRef}
           className="h-full w-full object-cover"
-          style={{ transform: mirror ? "scaleX(-1)" : "none" }}
           playsInline
           muted
           onLoadedMetadata={() => setReady(true)}
@@ -152,8 +151,8 @@ export function CameraCapture(props: {
         </div>
       </div>
       <div className="mt-2 text-xs text-white/60">
-        טיפ: אם “תצוגת צילום אחרונה” נראית הפוכה יחסית למצלמה, הפעילו תצוגת מראה. שמרו על אותה אוריינטציה לכל
-        הפאות (U/R/F/D/L/B לפי התצוגה) כדי למנוע טעויות.
+        טיפ: אם “תצוגת צילום אחרונה” נראית הפוכה יחסית למצלמה, הפעילו “היפוך צילום”. הווידאו נשאר טבעי כדי
+        להקל על הצילום. שמרו על אותה אוריינטציה לכל הפאות (U/R/F/D/L/B לפי התצוגה) כדי למנוע טעויות.
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">

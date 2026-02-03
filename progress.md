@@ -54,3 +54,5 @@ TODO:
 - Ran `npm run test:run` after calibration changes.
 - Added mirror toggle for camera capture to fix left/right inversion; sampling respects mirror setting and video preview flips.
 - Ran `npm run test:run` after mirror change.
+- Changed mirror behavior: keep video natural, only flip capture sampling via “היפוך צילום” toggle to avoid mirrored controls.
+- Ran `npm run test:run` after mirror behavior update.
