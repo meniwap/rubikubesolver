@@ -1,0 +1,40 @@
+Original prompt: היית באמצע לעשות את הקוביה והמשחק ונתקעת אתה יכול להמשיך בבקשה? לא יודע מה היה התכנון תזרום פשוט
+
+- Added Play solve session panel (start scramble + auto timer) and solve stats persisted in localStorage.
+- Added isSolved tracking + timer stop on solved; scramble no longer counts in history.
+- Added fullscreen toggle (F) for cube viewport.
+- Added render_game_to_text + advanceTime hookup for Playwright.
+- Added shared time formatter.
+- Installed playwright dev dependency.
+- Ran Playwright client on http://127.0.0.1:5174, verified cube renders and state JSON updated.
+
+TODO:
+- Validate timer start/stop logic in real play (manual key/move sequence).
+- Consider exposing solve session controls on Learn page if desired.
+- Fixed idle queue: enqueueMoves now triggers startNextMove immediately so moves fire when buttons/keys pressed.
+- Fixed timer UI to re-render while running (interval tick).
+- Initialized cubejs solver before scramble/startSolve to avoid silent failures.
+- Added short-solution check (1-2 moves) before calling optimal solver.
+- Added visual facelet mapping + mismatch detection (dev/test) and tests; fixed move rotation sign to align with cubejs.
+- Added scramble fallback generator + solver init on startup.
+- Timer now starts on first user move after session (source tracking).
+- Added Playwright regression runner + smoke/full suites.
+- Extended optimal solver short-depth BFS to <=4.
+- Added tests for visual mapping + scramble fallback + optimal short solution.
+- Playwright suites run; fullscreen skipped when unsupported.
+- Fixed EnterCube color mapping to standard (U=white, D=yellow) + added test to assert facelets match cubejs solved.
+- Upgraded optimal short-solve to meet-in-the-middle (<=6 moves) with cache.
+- Added additional Playwright scenario for Learn hint application.
+- All vitest tests passing; Playwright smoke + full suites pass (fullscreen skipped if unsupported).
+- Added strict orientation normalization for EnterCube: map colors to faces, then rotate only via legal cube rotations (x/y/z). Reject impossible center orientation; updated tests accordingly.
+- loadFromFacelets now uses validated/normalized facelets directly (no extra upright rotation) and shows a short success status message.
+- Optimal short-solver increased to meet-in-the-middle depth 4 (guarantees optimal up to 8 moves) and test added.
+- Added Playwright scenario to verify invalid EnterCube orientation is rejected.
+- Ran `npm run test:run` (all tests pass) and `npm run test:playwright:smoke` + `npm run test:playwright` (fullscreen skipped if unsupported).
+- Reverted EnterCube mapping to preserve user orientation (center-based mapping); removed strict rotation normalization.
+- Added CameraCapture component (live video + grid + capture + retake + next face) with color matching utility.
+- Added colorMatch unit tests and updated validation tests for preserved orientation.
+- Updated EnterCube UI with camera panel, center color summary, and updated info text.
+- Added vercel.json and updated .gitignore + README.
+- Updated Playwright enter-cube scenarios to check load status + invalid centers error.
+- Ran `npm run test:run`, `npm run test:playwright:smoke`, `npm run test:playwright` (fullscreen skipped).
