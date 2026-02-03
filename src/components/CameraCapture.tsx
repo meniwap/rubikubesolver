@@ -19,6 +19,7 @@ export function CameraCapture(props: {
   const streamRef = useRef<MediaStream | null>(null);
   const [enabled, setEnabled] = useState(false);
   const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
+  const [mirror, setMirror] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastCapture, setLastCapture] = useState<StickerColor[] | null>(null);
   const [ready, setReady] = useState(false);
@@ -75,7 +76,7 @@ export function CameraCapture(props: {
       setError("המצלמה עדיין לא מוכנה לצילום.");
       return;
     }
-    const colors = sampleFaceColors(video, OVERLAY_SCALE, props.calibration);
+    const colors = sampleFaceColors(video, OVERLAY_SCALE, props.calibration, mirror);
     if (colors.length === 9) {
       setLastCapture(colors);
       props.onCapture(colors);
@@ -122,6 +123,12 @@ export function CameraCapture(props: {
           >
             החלף מצלמה
           </button>
+          <button
+            className="rounded-lg bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/15"
+            onClick={() => setMirror((v) => !v)}
+          >
+            {mirror ? "תצוגת מראה: כן" : "תצוגת מראה: לא"}
+          </button>
         </div>
       </div>
 
@@ -129,6 +136,7 @@ export function CameraCapture(props: {
         <video
           ref={videoRef}
           className="h-full w-full object-cover"
+          style={{ transform: mirror ? "scaleX(-1)" : "none" }}
           playsInline
           muted
           onLoadedMetadata={() => setReady(true)}
@@ -144,7 +152,8 @@ export function CameraCapture(props: {
         </div>
       </div>
       <div className="mt-2 text-xs text-white/60">
-        טיפ: שמרו על אותה אוריינטציה לכל הפאות (U/R/F/D/L/B לפי התצוגה) כדי למנוע טעויות.
+        טיפ: אם “תצוגת צילום אחרונה” נראית הפוכה יחסית למצלמה, הפעילו תצוגת מראה. שמרו על אותה אוריינטציה לכל
+        הפאות (U/R/F/D/L/B לפי התצוגה) כדי למנוע טעויות.
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -196,7 +205,12 @@ export function CameraCapture(props: {
   );
 }
 
-function sampleFaceColors(video: HTMLVideoElement, scale: number, calibration?: CalibrationMap): StickerColor[] {
+function sampleFaceColors(
+  video: HTMLVideoElement,
+  scale: number,
+  calibration?: CalibrationMap,
+  mirror?: boolean,
+): StickerColor[] {
   const width = video.videoWidth;
   const height = video.videoHeight;
   const canvas = document.createElement("canvas");
@@ -214,7 +228,8 @@ function sampleFaceColors(video: HTMLVideoElement, scale: number, calibration?: 
 
   for (let row = 0; row < 3; row++) {
     for (let col = 0; col < 3; col++) {
-      const cx = Math.round(startX + (col + 0.5) * cell);
+      const sampleCol = mirror ? 2 - col : col;
+      const cx = Math.round(startX + (sampleCol + 0.5) * cell);
       const cy = Math.round(startY + (row + 0.5) * cell);
       const rgb = sampleAverage(ctx, cx, cy, Math.max(3, Math.round(cell * 0.1)));
       colors.push(matchStickerColor(rgb, calibration));

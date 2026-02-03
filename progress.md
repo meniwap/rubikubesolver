@@ -52,3 +52,5 @@ TODO:
 - Camera capture now uses calibration if available; added UI chips and reset button in Enter page.
 - Added colorMatch test to ensure calibrated mapping is used.
 - Ran `npm run test:run` after calibration changes.
+- Added mirror toggle for camera capture to fix left/right inversion; sampling respects mirror setting and video preview flips.
+- Ran `npm run test:run` after mirror change.
