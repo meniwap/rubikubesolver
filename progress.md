@@ -65,3 +65,4 @@ TODO:
 - loadFromFacelets now accepts faceColors to preserve scanned color scheme across modes; scramble/startSolve keep existing colors.
 - Added faceColors to render_game_to_text payload for debugging.
 - Ran `npm run test:run` and `npm run test:playwright:smoke` after changes.
+- Fixed PlayPage reset handler to keep faceColors after scan-based load; build now passes.
