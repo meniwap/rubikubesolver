@@ -32,7 +32,7 @@ export function LearnPage() {
           <button
             className="btn-success flex items-center gap-2"
             disabled={isAnimating}
-            onClick={requestHint}
+            onClick={() => requestHint()}
           >
             <HintIcon />
             רמז
