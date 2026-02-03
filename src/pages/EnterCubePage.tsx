@@ -4,6 +4,7 @@ import { FACE_TO_COLOR, STICKER_COLORS, type StickerColor, toURFDLBFacelets, val
 import { useGameStore } from "../state/gameStore";
 import { CameraCapture } from "../components/CameraCapture";
 import { FaceletPreview } from "../components/FaceletPreview";
+import type { CalibrationMap, RGB } from "../utils/colorMatch";
 
 const FACES: Face[] = ["U", "R", "F", "D", "L", "B"];
 const FACE_ORDER: Face[] = ["U", "R", "F", "D", "L", "B"];
@@ -17,6 +18,7 @@ export function EnterCubePage() {
   const [selectedFace, setSelectedFace] = useState<Face>("U");
   const [selectedColor, setSelectedColor] = useState<StickerColor>("white");
   const [errors, setErrors] = useState<string[]>([]);
+  const [calibration, setCalibration] = useState<CalibrationMap>({});
 
   const faceOffset = faceIndexOffset(selectedFace);
   const centerColors = useMemo<Record<Face, StickerColor>>(
@@ -31,6 +33,10 @@ export function EnterCubePage() {
     [colors],
   );
   const nextFace = nextFaceFor(selectedFace);
+  const calibrationCount = useMemo(
+    () => STICKER_COLORS.filter((c) => Boolean(calibration[c])).length,
+    [calibration],
+  );
 
   const onLoad = async (mode: "play" | "learn") => {
     const validation = validateFaceletColors(colors);
@@ -46,6 +52,10 @@ export function EnterCubePage() {
   const handleCapture = (faceColors: StickerColor[]) => {
     if (faceColors.length !== 9) return;
     setColors((prev) => applyFaceColors(prev, selectedFace, faceColors));
+  };
+
+  const handleSampleColor = (rgb: RGB) => {
+    setCalibration((prev) => ({ ...prev, [selectedColor]: rgb }));
   };
 
   return (
@@ -88,6 +98,9 @@ export function EnterCubePage() {
             nextFaceLabel={faceLabelHe(nextFace)}
             onCapture={handleCapture}
             onNextFace={() => setSelectedFace(nextFace)}
+            calibration={calibration}
+            sampleLabel={colorLabelHe(selectedColor)}
+            onSampleColor={handleSampleColor}
           />
 
           <FaceletPreview colors={colors} />
@@ -153,6 +166,25 @@ export function EnterCubePage() {
                 />
               ))}
             </div>
+            <div className="mt-3 rounded-lg bg-white/10 px-3 py-2 text-xs text-white/70">
+              כיול מצלמה (מומלץ): {calibrationCount}/6 צבעים דגומים. בחר/י צבע ואז לחצ/י “דגום צבע” ליד המצלמה.
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {STICKER_COLORS.map((c) => (
+                <div
+                  key={`${c}-calib`}
+                  className={`h-6 w-6 rounded-sm border ${calibration[c] ? "border-white" : "border-white/10"}`}
+                  style={{ background: colorHex(c) }}
+                  title={calibration[c] ? `דגום: ${colorLabelHe(c)}` : `לא דגום: ${colorLabelHe(c)}`}
+                />
+              ))}
+            </div>
+            <button
+              className="mt-3 rounded-lg bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15"
+              onClick={() => setCalibration({})}
+            >
+              נקה כיול
+            </button>
           </div>
 
           <div className="grid grid-cols-2 gap-2">

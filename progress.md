@@ -48,3 +48,7 @@ TODO:
 - Vercel CLI installed and logged in; initial deploy attempted (build fixed locally).
 - Added FaceletPreview 3D cube in Enter page to visualize current entered colors live; uses OrbitControls to rotate.
 - Ran `npm run test:run` and `npm run test:playwright:smoke` after preview addition.
+- Added camera calibration workflow: sample each sticker color to build a calibration map for more reliable white detection.
+- Camera capture now uses calibration if available; added UI chips and reset button in Enter page.
+- Added colorMatch test to ensure calibrated mapping is used.
+- Ran `npm run test:run` after calibration changes.

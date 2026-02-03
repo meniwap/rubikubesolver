@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { StickerColor } from "../cube/validation";
 import type { Face } from "../cube/types";
-import { matchStickerColor } from "../utils/colorMatch";
+import { matchStickerColor, type CalibrationMap, type RGB } from "../utils/colorMatch";
 
 const OVERLAY_SCALE = 0.6;
 
@@ -11,6 +11,9 @@ export function CameraCapture(props: {
   nextFaceLabel: string;
   onCapture: (colors: StickerColor[]) => void;
   onNextFace: () => void;
+  calibration?: CalibrationMap;
+  sampleLabel?: string;
+  onSampleColor?: (rgb: RGB) => void;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -72,10 +75,22 @@ export function CameraCapture(props: {
       setError("המצלמה עדיין לא מוכנה לצילום.");
       return;
     }
-    const colors = sampleFaceColors(video, OVERLAY_SCALE);
+    const colors = sampleFaceColors(video, OVERLAY_SCALE, props.calibration);
     if (colors.length === 9) {
       setLastCapture(colors);
       props.onCapture(colors);
+    }
+  };
+
+  const sampleColor = () => {
+    const video = videoRef.current;
+    if (!video || video.videoWidth === 0 || video.videoHeight === 0) {
+      setError("המצלמה עדיין לא מוכנה לצילום.");
+      return;
+    }
+    const rgb = sampleCenterColor(video, OVERLAY_SCALE);
+    if (rgb && props.onSampleColor) {
+      props.onSampleColor(rgb);
     }
   };
 
@@ -140,6 +155,15 @@ export function CameraCapture(props: {
         >
           Capture Face
         </button>
+        {props.onSampleColor && (
+          <button
+            className="rounded-lg bg-sky-500/20 px-3 py-2 text-sm font-semibold hover:bg-sky-500/30 disabled:opacity-50"
+            disabled={!enabled || !ready}
+            onClick={sampleColor}
+          >
+            דגום צבע {props.sampleLabel ? `(${props.sampleLabel})` : ""}
+          </button>
+        )}
         {lastCapture && (
           <button
             className="rounded-lg bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/15"
@@ -172,7 +196,7 @@ export function CameraCapture(props: {
   );
 }
 
-function sampleFaceColors(video: HTMLVideoElement, scale: number): StickerColor[] {
+function sampleFaceColors(video: HTMLVideoElement, scale: number, calibration?: CalibrationMap): StickerColor[] {
   const width = video.videoWidth;
   const height = video.videoHeight;
   const canvas = document.createElement("canvas");
@@ -193,11 +217,30 @@ function sampleFaceColors(video: HTMLVideoElement, scale: number): StickerColor[
       const cx = Math.round(startX + (col + 0.5) * cell);
       const cy = Math.round(startY + (row + 0.5) * cell);
       const rgb = sampleAverage(ctx, cx, cy, Math.max(3, Math.round(cell * 0.1)));
-      colors.push(matchStickerColor(rgb));
+      colors.push(matchStickerColor(rgb, calibration));
     }
   }
 
   return colors;
+}
+
+function sampleCenterColor(video: HTMLVideoElement, scale: number): RGB | null {
+  const width = video.videoWidth;
+  const height = video.videoHeight;
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return null;
+  ctx.drawImage(video, 0, 0, width, height);
+
+  const size = Math.min(width, height) * scale;
+  const startX = (width - size) / 2;
+  const startY = (height - size) / 2;
+  const cell = size / 3;
+  const cx = Math.round(startX + 1.5 * cell);
+  const cy = Math.round(startY + 1.5 * cell);
+  return sampleAverage(ctx, cx, cy, Math.max(3, Math.round(cell * 0.14)));
 }
 
 function sampleAverage(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) {
